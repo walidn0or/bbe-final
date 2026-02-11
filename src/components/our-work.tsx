@@ -1,15 +1,15 @@
 "use client"
 
 import Image from "next/image"
-import { useMemo, useState } from "react"
-import { X, ArrowLeft, ArrowRight } from "lucide-react"
+import { useMemo, useState, useEffect } from "react"
+import { X, Upload, ChevronLeft, ChevronRight } from "lucide-react"
 import { images, getImage } from "@/config/images"
+import { InlineImageUpload } from "@/components/inline-image-upload"
 
 interface WorkItem {
   key: keyof typeof images.ourWork
   title: string
   description: string
-  gallery: string[]
 }
 
 const workItems: WorkItem[] = [
@@ -18,72 +18,110 @@ const workItems: WorkItem[] = [
     title: "Breaking the Stereotypes",
     description:
       "Menstruation is a natural biological process and should never be treated as a taboo. Understanding it is essential for self-care, health, and empowerment. In October 2024, our team delivered comprehensive hygiene education and training for young girls in Qala Fatullah, Kabul, Afghanistan. Alongside the training, we provided essential menstrual hygiene supplies to support their health and well-being. These initiatives were made possible with the generous support of our partners and donors, enabling us to address critical gaps in knowledge and resources while promoting dignity, confidence, and resilience among vulnerable girls in marginalized communities.",
-    gallery: images.ourWorkGallery.menstrualHygiene || []
   },
   {
     key: "languageSkills",
     title: "Enhancing Language Skills",
     description:
       "Our free virtual English classes empower young girls and women from over 15 provinces in Afghanistan to strengthen their language abilities, access educational resources and information, and expand their professional and social networks. These classes are designed not only to improve communication skills but also to foster confidence, critical thinking, and opportunities for personal and economic growth in marginalized communities. We also offer a free, virtual IELTS preparation program taught by qualified British instructors. This initiative provides participants with the opportunity to strengthen their English proficiency and prepare for international study or professional opportunities abroad. The program delivers high-quality instruction at no cost, equipping learners with the skills and guidance necessary to achieve a recognized IELTS score upon completion, thereby opening doors to higher education, scholarships, and global career pathways.",
-    gallery: images.ourWorkGallery.languageSkills || []
   },
   {
     key: "orphanSupport",
     title: "Orphan Support Program",
     description:
       "Beyond Borders Empowerment is honored to serve children in two orphanages in Qala Fatullah, Kabul, Afghanistan. Our compassionate team provides consistent care and creates a nurturing environment where children can thrive emotionally, socially, and creatively. Through activities such as art workshops, storytelling, and small celebrations during Ramadan, Eid, Children's Day, and other cultural events, we foster joy, laughter, and a sense of belonging. By combining care with opportunities for personal expression and social engagement, our program empowers these young lives to build resilience, confidence, and hope for a brighter future.",
-    gallery: images.ourWorkGallery.orphanSupport || []
   },
   {
     key: "scholarshipMentorship",
     title: "Scholarship and Mentorship Programs",
     description:
       "Beyond Borders Empowerment regularly provides scholarship guidance and mentorship sessions for women and girls, equipping them with the knowledge, skills, and confidence to pursue higher education and professional opportunities. Through these sessions, participants gain access to information on scholarship opportunities, receive personalized advice, and engage with mentors and alumni who offer guidance, encouragement, and support. By fostering both knowledge and empowerment, these programs help women and girls navigate educational pathways and realize their full potential.",
-    gallery: images.ourWorkGallery.scholarshipMentorship || []
   },
   {
     key: "artClub",
     title: "Our Art Club",
     description:
       "Beyond Borders Empowerment's Art Club offers a vital creative outlet in the restrictive environment of Afghanistan, where opportunities for artistic expression are limited for women, girls, and even men. These classes provide beneficiaries with a safe and supportive space to come together, learn new skills, and connect with peers. Meeting twice a week, participants can explore their artistic talents, express themselves freely, and cultivate confidence and resilience. Through this program, art becomes not only a means of personal development but also a powerful tool for empowerment, self-discovery, and community engagement.",
-    gallery: images.ourWorkGallery.artClub || []
   },
   {
     key: "healthSupport",
     title: "Our Health Support Program",
     description:
       "We organize free health camps in partnership with a network of professional doctors, providing critical healthcare services to those who need them most. These camps specifically target vulnerable populations, including women, children, the elderly, and forced returnees from neighboring countries. Participants receive access to quality medical care, essential medications, and health guidance, ensuring that basic healthcare needs are met. By combining professional expertise with community outreach, these health camps play a vital role in promoting well-being, resilience, and improved quality of life among marginalized communities. Our health team also provides critical support to individuals facing severe financial hardship, ensuring access to essential healthcare even when resources are limited. In emergency cases, they assist with hospital visit fees and the purchase of necessary medications, helping vulnerable community members overcome financial barriers and receive timely medical care.",
-    gallery: images.ourWorkGallery.healthSupport || []
   }
 ]
 
 export function OurWork() {
-  const [activeKey, setActiveKey] = useState<WorkItem["key"] | null>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeKey, setActiveKey] = useState<keyof typeof images.ourWork | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [workImages, setWorkImages] = useState<Record<string, string>>({})
+  const [workGalleries, setWorkGalleries] = useState<Record<string, string[]>>({})
+  const [selectedModalImage, setSelectedModalImage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsAdmin(new URLSearchParams(window.location.search).get("admin") === "1")
+      // Load saved images from localStorage
+      workItems.forEach((item) => {
+        const key = String(item.key)
+        const mainImg = localStorage.getItem(`our_work_${key}_image_url`)
+        if (mainImg) {
+          setWorkImages((prev) => ({ ...prev, [key]: mainImg }))
+        }
+
+        const galleryStr = localStorage.getItem(`our_work_${key}_gallery`)
+        if (galleryStr) {
+          try {
+            const parsed = JSON.parse(galleryStr)
+            if (Array.isArray(parsed)) {
+              setWorkGalleries((prev) => ({ ...prev, [key]: parsed.filter(Boolean) }))
+            }
+          } catch {}
+        }
+      })
+    }
+  }, [])
 
   const activeItem = useMemo(() => workItems.find((w) => w.key === activeKey) || null, [activeKey])
-  const activeImages = useMemo(() => {
+  const activeImage = useMemo(() => {
+    if (!activeItem) return images.fallback.placeholder
+    const key = String(activeItem.key)
+    return workImages[key] || getImage(images.ourWork[activeItem.key], images.fallback.placeholder)
+  }, [activeItem, workImages])
+
+  const activeGallery = useMemo(() => {
     if (!activeItem) return []
-    const base = getImage(images.ourWork[activeItem.key], images.fallback.placeholder)
-    const gallery = activeItem.gallery?.filter(Boolean) || []
-    const all = [base, ...gallery]
-    return all.length ? all : [images.fallback.placeholder]
-  }, [activeItem])
+    const key = String(activeItem.key)
+    const fromStorage = workGalleries[key]
+    if (Array.isArray(fromStorage) && fromStorage.length > 0) return fromStorage
+
+    const fromConfig = (images.ourWorkGallery?.[activeItem.key] as string[] | undefined) || []
+    return Array.isArray(fromConfig) ? fromConfig.filter(Boolean) : []
+  }, [activeItem, workGalleries])
+
+  const modalImages = useMemo(() => {
+    const base = [activeImage, ...activeGallery]
+    const uniq: string[] = []
+    for (const src of base) {
+      if (!src) continue
+      if (!uniq.includes(src)) uniq.push(src)
+    }
+    return uniq
+  }, [activeImage, activeGallery])
 
   const closeModal = () => {
     setActiveKey(null)
-    setActiveIndex(0)
+    setSelectedModalImage(null)
   }
 
-  const goNext = () => {
-    if (!activeImages.length) return
-    setActiveIndex((prev) => (prev + 1) % activeImages.length)
-  }
+  useEffect(() => {
+    if (!activeItem) {
+      setSelectedModalImage(null)
+      return
+    }
 
-  const goPrev = () => {
-    if (!activeImages.length) return
-    setActiveIndex((prev) => (prev - 1 + activeImages.length) % activeImages.length)
-  }
+    setSelectedModalImage(activeImage)
+  }, [activeItem, activeImage])
 
   return (
     <section className="py-12 md:py-16 lg:py-20">
@@ -98,58 +136,71 @@ export function OurWork() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:gap-5 lg:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {workItems.map((item) => {
-            const gallery = item.gallery?.filter(Boolean) || []
-            const preview = gallery.slice(0, 2)
-            const remaining = Math.max(gallery.length - preview.length, 0)
+            const key = String(item.key)
+            const mainImage = workImages[key] || getImage(images.ourWork[item.key], images.fallback.placeholder)
+            // Truncate description to 2 lines
+            const truncatedDesc = item.description.length > 120 
+              ? item.description.substring(0, 120) + "..." 
+              : item.description
 
             return (
               <div
-                key={String(item.key)}
-                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+                key={key}
+                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => {
                   setActiveKey(item.key)
-                  setActiveIndex(0)
                 }}
               >
-                <div className="relative h-44 md:h-52 lg:h-56 overflow-hidden">
+                <div className="relative h-32 md:h-36 lg:h-40 overflow-hidden">
                   <Image
-                    src={getImage(images.ourWork[item.key], images.fallback.placeholder)}
+                    src={getImage(mainImage, images.fallback.placeholder)}
                     alt={item.title}
                     fill
                     className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                    sizes="(min-width: 1024px) 400px, (min-width: 768px) 50vw, 100vw"
-                    priority={item.key === "menstrualHygiene"}
+                    sizes="(min-width: 1024px) 300px, (min-width: 768px) 50vw, 100vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
-                  <span className="absolute top-3 right-3 bg-white/85 text-red-600 text-xs font-semibold px-3 py-1 rounded-full shadow">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent"></div>
+                  <span className="absolute top-2 right-2 bg-white/90 text-red-600 text-[10px] md:text-xs font-semibold px-2 py-0.5 rounded-full shadow text-center max-w-[80%] truncate">
                     {item.title}
                   </span>
-                </div>
-                <div className="p-5 md:p-6 space-y-3">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">{item.description}</p>
-                  {preview.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      {preview.map((img, idx) => (
-                        <div key={`${item.key}-thumb-${idx}`} className="relative w-16 h-12 rounded-lg overflow-hidden ring-1 ring-gray-200">
-                          <Image
-                            src={getImage(img, images.fallback.placeholder)}
-                            alt={`${item.title} gallery ${idx + 1}`}
-                            fill
-                            className="object-cover"
-                            sizes="80px"
-                          />
+                  {isAdmin && (
+                    <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <InlineImageUpload
+                        storageKey={`our_work_${key}_image_url`}
+                        onUploaded={(url) => {
+                          setWorkImages((prev) => ({ ...prev, [key]: url }))
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(`our_work_${key}_image_url`, url)
+                          }
+                        }}
+                      >
+                        <div className="bg-white/90 hover:bg-white text-red-600 px-2 py-1 rounded text-[10px] flex items-center gap-1 shadow cursor-pointer">
+                          <Upload className="h-3 w-3" />
+                          Change
                         </div>
-                      ))}
-                      {remaining > 0 && (
-                        <span className="text-xs font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full">
-                          +{remaining} more
-                        </span>
-                      )}
+                      </InlineImageUpload>
                     </div>
                   )}
+                </div>
+                <div className="p-3 md:p-4 space-y-2">
+                  <h3 className="text-sm md:text-base font-bold text-gray-900 truncate">{item.title}</h3>
+                  <p className="text-gray-600 text-xs md:text-sm leading-relaxed" style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>{truncatedDesc}</p>
+                  <button 
+                    className="text-red-600 text-xs font-semibold hover:text-red-700 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setActiveKey(item.key)
+                    }}
+                  >
+                    Read more →
+                  </button>
                 </div>
               </div>
             )
@@ -160,71 +211,120 @@ export function OurWork() {
       {activeItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal}></div>
-          <div className="relative bg-white rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden z-10">
-            <div className="flex justify-between items-start gap-4 p-4 md:p-6">
-              <div>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto z-10">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 md:p-6 flex justify-between items-start gap-4 z-10">
+              <div className="flex-1">
                 <p className="text-xs uppercase tracking-[0.2em] text-red-600 font-semibold mb-2">Our Work</p>
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">{activeItem.title}</h3>
-                <p className="mt-3 text-gray-600 text-sm md:text-base leading-relaxed">{activeItem.description}</p>
               </div>
               <button
                 onClick={closeModal}
-                className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100"
+                className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 flex-shrink-0"
                 aria-label="Close"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 md:h-6 md:w-6" />
               </button>
             </div>
-            <div className="relative">
-              <div className="relative h-72 md:h-96 bg-black">
-                <Image
-                  src={getImage(activeImages[activeIndex], images.fallback.placeholder)}
-                  alt={`${activeItem.title} image ${activeIndex + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 900px, 100vw"
-                />
+            
+            <div className="p-4 md:p-6">
+              <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-6 whitespace-pre-line">
+                {activeItem.description}
+              </p>
+              
+              <div className="relative rounded-lg overflow-hidden shadow-lg bg-black mb-4">
+                <div className="relative h-64 md:h-80 bg-black flex items-center justify-center">
+                  <Image
+                    src={getImage(selectedModalImage || activeImage, images.fallback.placeholder)}
+                    alt={`${activeItem.title} image`}
+                    fill
+                    className="object-contain"
+                    sizes="(min-width: 1024px) 800px, 100vw"
+                  />
+
+                  {modalImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = selectedModalImage || activeImage
+                          const i = modalImages.indexOf(current)
+                          const prev = modalImages[(i <= 0 ? modalImages.length : i) - 1] || modalImages[0]
+                          setSelectedModalImage(prev)
+                        }}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-900 rounded-full w-9 h-9 flex items-center justify-center shadow transition"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = selectedModalImage || activeImage
+                          const i = modalImages.indexOf(current)
+                          const next = modalImages[(i + 1) % modalImages.length] || modalImages[0]
+                          setSelectedModalImage(next)
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-900 rounded-full w-9 h-9 flex items-center justify-center shadow transition"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                {isAdmin && (
+                  <div className="absolute bottom-3 left-3">
+                    <InlineImageUpload
+                      storageKey={`our_work_${String(activeItem.key)}_image_url`}
+                      onUploaded={(url) => {
+                        const key = String(activeItem.key)
+                        setWorkImages((prev) => ({ ...prev, [key]: url }))
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem(`our_work_${key}_image_url`, url)
+                        }
+                      }}
+                    >
+                      <div className="bg-white/90 hover:bg-white text-red-600 px-3 py-1.5 rounded text-xs flex items-center gap-1.5 shadow cursor-pointer">
+                        <Upload className="h-3.5 w-3.5" />
+                        Change Main Image
+                      </div>
+                    </InlineImageUpload>
+                  </div>
+                )}
               </div>
-              {activeImages.length > 1 && (
-                <>
-                  <button
-                    onClick={goPrev}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow"
-                    aria-label="Previous image"
-                  >
-                    <ArrowLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={goNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow"
-                    aria-label="Next image"
-                  >
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
-                </>
+
+              {activeGallery.length > 0 && (
+                <div className="mt-6">
+                  <p className="text-xs uppercase tracking-[0.2em] text-red-600 font-semibold mb-3">Gallery</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {activeGallery.map((src, idx) => (
+                      <button
+                        key={`${src}-${idx}`}
+                        type="button"
+                        onClick={() => setSelectedModalImage(src)}
+                        className={`relative rounded-lg overflow-hidden border bg-gray-50 transition-colors ${
+                          (selectedModalImage || activeImage) === src
+                            ? "border-red-500 ring-2 ring-red-200"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                        aria-label={`View ${activeItem.title} gallery image ${idx + 1}`}
+                      >
+                        <div key={`${String(activeItem.key)}-thumb-${idx}`} className="relative w-16 h-12 rounded-lg overflow-hidden ring-1 ring-gray-200">
+                        <div className="relative h-24 sm:h-28 md:h-32">
+                          <Image
+                            src={getImage(src, images.fallback.placeholder)}
+                            alt={`${activeItem.title} gallery ${idx + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 50vw"
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
-            {activeImages.length > 1 && (
-              <div className="px-4 md:px-6 py-4 flex items-center gap-2 overflow-x-auto">
-                {activeImages.map((img, idx) => (
-                  <button
-                    key={`${String(activeItem.key)}-modal-thumb-${idx}`}
-                    onClick={() => setActiveIndex(idx)}
-                    className={`relative w-16 h-12 rounded-lg overflow-hidden ring-2 transition ${
-                      idx === activeIndex ? "ring-red-500" : "ring-transparent hover:ring-gray-300"
-                    }`}
-                  >
-                    <Image
-                      src={getImage(img, images.fallback.placeholder)}
-                      alt={`${activeItem.title} thumbnail ${idx + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       )}
