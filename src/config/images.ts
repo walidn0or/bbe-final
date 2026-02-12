@@ -9,6 +9,16 @@
 //   → successStories.barin / .wasiya / .moheba / .ozra  (each: image, video)
 // - Hero main image         → public/images/content/                  → hero.main
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+
+export const getAssetPath = (assetPath: string): string => {
+  if (!assetPath) return assetPath
+  if (!BASE_PATH) return assetPath
+  if (!assetPath.startsWith("/")) return assetPath
+  if (assetPath.startsWith(`${BASE_PATH}/`)) return assetPath
+  return `${BASE_PATH}${assetPath}`
+}
+
 export const images = {
   // Logo
   // To upload a new logo:
@@ -22,8 +32,8 @@ export const images = {
   // - Main image: put file in public/images/content/ and set path below
   // - Background video: put your file (e.g. background-video.mp4) in public/images/videos/ and set path below
   hero: {
-    main: "/hero/background-video.mp4",
-    background: "/hero/background-video.mp4"
+    main: "/images/content/Education + Human Rights Advocacy_.jpg",
+    background: "/images/videos/background-video.mp4"
   },
 
   // Home page gallery – the 6 tiles. Videos use their first frame as thumbnail (no separate thumbnail needed). Click a video to play.
@@ -330,5 +340,5 @@ export const images = {
 
 // Helper function to get image with fallback
 export const getImage = (imagePath: string | null | undefined, fallback: string = images.fallback.placeholder): string => {
-  return imagePath || fallback
+  return getAssetPath(imagePath || fallback)
 }

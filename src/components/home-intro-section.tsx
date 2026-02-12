@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PlayCircle, X } from "lucide-react";
-import { images } from "@/config/images";
+import { getAssetPath, images } from "@/config/images";
 import { OurWork } from "./our-work";
 
 interface HomeIntroSectionProps {
@@ -54,14 +54,14 @@ export function HomeIntroSection({ scrollToSection: _scrollToSection }: HomeIntr
               >
                 {media.type === "video" ? (
                   <>
-                    <img src={media.thumbnail} alt={media.alt} className="w-full h-full object-cover" />
+                    <img src={getAssetPath(media.thumbnail)} alt={media.alt} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                       <PlayCircle className="h-12 w-12 md:h-16 md:w-16 text-white opacity-90 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </>
                 ) : (
                   <img
-                    src={media.src}
+                    src={getAssetPath(media.src)}
                     alt={media.alt}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -95,7 +95,7 @@ export function HomeIntroSection({ scrollToSection: _scrollToSection }: HomeIntr
             <div className="p-4 md:p-6">
               <div className="relative rounded-lg overflow-hidden shadow-xl bg-black" style={{ maxHeight: "600px" }}>
                 <video
-                  src={activeVideo}
+                  src={getAssetPath(activeVideo)}
                   controls
                   autoPlay
                   playsInline
@@ -109,8 +109,8 @@ export function HomeIntroSection({ scrollToSection: _scrollToSection }: HomeIntr
                     backgroundColor: "#000",
                   }}
                 >
-                  <source src={activeVideo} type="video/mp4" />
-                  <source src={activeVideo} type="video/quicktime" />
+                  <source src={getAssetPath(activeVideo)} type="video/mp4" />
+                  <source src={getAssetPath(activeVideo)} type="video/quicktime" />
                   <p className="text-white text-center p-4">Your browser does not support the video tag.</p>
                 </video>
               </div>

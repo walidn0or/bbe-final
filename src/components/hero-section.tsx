@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Heart } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
-import { images } from "@/config/images"
+import { getAssetPath, images } from "@/config/images"
 
 interface HeroSectionProps {
   scrollToSection: (sectionId: string) => void
@@ -12,12 +12,12 @@ interface HeroSectionProps {
 
 export function HeroSection({ scrollToSection }: HeroSectionProps) {
   const { t, isRTL } = useLanguage()
-  const [heroImg, setHeroImg] = useState<string>(images.hero.main)
+  const [heroImg, setHeroImg] = useState<string>(getAssetPath(images.hero.main))
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("hero_image_url")
-      if (stored) setHeroImg(stored)
+      if (stored) setHeroImg(stored.startsWith("/") ? getAssetPath(stored) : stored)
     }
   }, [])
 
@@ -36,11 +36,11 @@ export function HeroSection({ scrollToSection }: HeroSectionProps) {
           loop
           playsInline
           preload="metadata"
-          poster={images.hero.main}
+          poster={getAssetPath(images.hero.main)}
           aria-hidden="true"
         >
-          <source src={images.hero.background} type="video/mp4" />
-          <source src={images.hero.background} type="video/quicktime" />
+          <source src={getAssetPath(images.hero.background)} type="video/mp4" />
+          <source src={getAssetPath(images.hero.background)} type="video/quicktime" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-br from-black/65 via-black/45 to-brand-blue/35 mix-blend-multiply backdrop-blur-sm"></div>
       </div>
