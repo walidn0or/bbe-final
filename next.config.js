@@ -1,7 +1,17 @@
 /** @type {import('next').NextConfig} */
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   // Production optimizations
   reactStrictMode: true,
+ 
+  ...(BASE_PATH
+    ? {
+        basePath: BASE_PATH,
+        assetPrefix: BASE_PATH,
+      }
+    : {}),
   
   // Image optimization
   images: {
