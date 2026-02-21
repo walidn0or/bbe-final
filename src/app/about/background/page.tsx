@@ -114,7 +114,7 @@ Respect for Dignity: We treat every individual and culture with the utmost respe
           </p>
           <Button
             asChild
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-lg"
+            className="h-auto bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-lg"
           >
             <Link href="/#contact">Contact Us</Link>
           </Button>

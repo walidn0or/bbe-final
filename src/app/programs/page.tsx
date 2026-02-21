@@ -36,7 +36,7 @@ export default function ProgramsPage() {
     <LanguageProvider>
       <div className="min-h-screen bg-white">
         <Header activeSection="programs" scrollToSection={handleNavigation} />
-        <main>
+        <main className="pt-20 sm:pt-24">
           <ProgramsSection />
         </main>
         <Footer scrollToSection={handleNavigation} />

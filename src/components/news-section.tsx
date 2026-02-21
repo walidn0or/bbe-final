@@ -26,7 +26,6 @@ export function NewsSection() {
   const { t, isRTL } = useLanguage()
 
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null)
-  const [selectedModalImage, setSelectedModalImage] = useState<string | null>(null)
   const [animateCards, setAnimateCards] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [showShareMenu, setShowShareMenu] = useState<number | null>(null)
@@ -116,32 +115,17 @@ export function NewsSection() {
 
   const handleArticleClick = (article: NewsArticle) => {
     setSelectedArticle(article)
-    setSelectedModalImage(null)
     document.body.style.overflow = "hidden"
   }
 
   const handleCloseModal = () => {
     setSelectedArticle(null)
-    setSelectedModalImage(null)
     document.body.style.overflow = "unset"
   }
 
-  const selectedGalleryImages = (() => {
-    if (!selectedArticle) return [] as string[]
-    const newsById = images.news as unknown as Record<number, { gallery?: readonly string[] }>
-    const fromConfig = newsById[selectedArticle.id]?.gallery || []
-    const base = [selectedArticle.image, ...fromConfig]
-    const uniq: string[] = []
-    for (const src of base) {
-      if (!src) continue
-      const resolved = getImage(src, images.fallback.placeholder)
-      if (!uniq.includes(resolved)) uniq.push(resolved)
-    }
-    return uniq
-  })()
-
-  const selectedMainImage =
-    selectedModalImage || (selectedGalleryImages[0] ? selectedGalleryImages[0] : getImage(selectedArticle?.image, images.fallback.placeholder))
+  const selectedMainImage = selectedArticle
+    ? getImage(selectedArticle.image, images.fallback.placeholder)
+    : images.fallback.placeholder
 
   const handleShare = (article: NewsArticle, platform: string) => {
     const url = typeof window !== 'undefined' ? window.location.origin : ''
@@ -307,56 +291,56 @@ export function NewsSection() {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all"
+                      className="h-10 w-10 min-h-[40px] min-w-[40px] border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all"
                       onClick={() => setShowShareMenu(showShareMenu === featuredArticle.id ? null : featuredArticle.id)}
                     >
-                      <Share2 className="h-4 w-4" />
+                      <Share2 className="h-5 w-5" />
                     </Button>
                     {showShareMenu === featuredArticle.id && (
                       <div className={`absolute bottom-full mb-2 ${isRTL ? "left-0" : "right-0"} bg-white rounded-lg shadow-2xl border border-gray-200 p-2 z-[9999] min-w-[200px] animate-scale-in`}>
                         <div className="text-xs font-semibold text-gray-500 px-3 py-2 border-b">{t("news.shareOn") || "Share on"}</div>
                         <button
                           onClick={() => handleShare(featuredArticle, 'twitter')}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                         >
-                          <Twitter className="h-4 w-4 text-blue-400" />
-                          <span className="text-sm">Twitter</span>
+                          <Twitter className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                          <span className="text-sm leading-none">Twitter</span>
                         </button>
                         <button
                           onClick={() => handleShare(featuredArticle, 'facebook')}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                         >
-                          <Facebook className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm">Facebook</span>
+                          <Facebook className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                          <span className="text-sm leading-none">Facebook</span>
                         </button>
                         <button
                           onClick={() => handleShare(featuredArticle, 'linkedin')}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                         >
-                          <Linkedin className="h-4 w-4 text-blue-700" />
-                          <span className="text-sm">LinkedIn</span>
+                          <Linkedin className="h-5 w-5 text-blue-700 flex-shrink-0" />
+                          <span className="text-sm leading-none">LinkedIn</span>
                         </button>
                         <button
                           onClick={() => handleShare(featuredArticle, 'whatsapp')}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-green-50 rounded-md transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-green-50 rounded-md transition-colors text-left"
                         >
-                          <MessageCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm">WhatsApp</span>
+                          <MessageCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                          <span className="text-sm leading-none">WhatsApp</span>
                         </button>
                         <button
                           onClick={() => handleShare(featuredArticle, 'email')}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-gray-50 rounded-md transition-colors text-left"
                         >
-                          <Mail className="h-4 w-4 text-gray-600" />
-                          <span className="text-sm">Email</span>
+                          <Mail className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm leading-none">Email</span>
                         </button>
                         <div className="border-t my-1"></div>
                         <button
                           onClick={() => handleShare(featuredArticle, 'copy')}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-gray-50 rounded-md transition-colors text-left"
                         >
-                          {copiedLink ? <Check className="h-4 w-4 text-green-600" /> : <Link2 className="h-4 w-4 text-gray-600" />}
-                          <span className="text-sm">{copiedLink ? t("news.linkCopied") || "Link Copied!" : t("news.copyLink") || "Copy Link"}</span>
+                          {copiedLink ? <Check className="h-5 w-5 text-green-600 flex-shrink-0" /> : <Link2 className="h-5 w-5 text-gray-600 flex-shrink-0" />}
+                          <span className="text-sm leading-none">{copiedLink ? t("news.linkCopied") || "Link Copied!" : t("news.copyLink") || "Copy Link"}</span>
                         </button>
                       </div>
                     )}
@@ -468,13 +452,13 @@ export function NewsSection() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all"
+                        className="h-10 w-10 min-h-[40px] min-w-[40px] text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all"
                         onClick={(e) => {
                           e.stopPropagation()
                           setShowShareMenu(showShareMenu === article.id ? null : article.id)
                         }}
                       >
-                        <Share2 className="h-4 w-4" />
+                        <Share2 className="h-5 w-5" />
                       </Button>
                       {showShareMenu === article.id && (
                         <div
@@ -486,50 +470,50 @@ export function NewsSection() {
                               e.stopPropagation()
                               handleShare(article, 'twitter')
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                           >
-                            <Twitter className="h-4 w-4 text-blue-400" />
-                            <span className="text-sm">Twitter</span>
+                            <Twitter className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                            <span className="text-sm leading-none">Twitter</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleShare(article, 'facebook')
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                           >
-                            <Facebook className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm">Facebook</span>
+                            <Facebook className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                            <span className="text-sm leading-none">Facebook</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleShare(article, 'linkedin')
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                           >
-                            <Linkedin className="h-4 w-4 text-blue-700" />
-                            <span className="text-sm">LinkedIn</span>
+                            <Linkedin className="h-5 w-5 text-blue-700 flex-shrink-0" />
+                            <span className="text-sm leading-none">LinkedIn</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleShare(article, 'whatsapp')
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-green-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-green-50 rounded-md transition-colors text-left"
                           >
-                            <MessageCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-sm">WhatsApp</span>
+                            <MessageCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                            <span className="text-sm leading-none">WhatsApp</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               handleShare(article, 'email')
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-gray-50 rounded-md transition-colors text-left"
                           >
-                            <Mail className="h-4 w-4 text-gray-600" />
-                            <span className="text-sm">Email</span>
+                            <Mail className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                            <span className="text-sm leading-none">Email</span>
                           </button>
                           <div className="border-t my-1"></div>
                           <button
@@ -537,10 +521,10 @@ export function NewsSection() {
                               e.stopPropagation()
                               handleShare(article, 'copy')
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-gray-50 rounded-md transition-colors text-left"
                           >
-                            {copiedLink ? <Check className="h-4 w-4 text-green-600" /> : <Link2 className="h-4 w-4 text-gray-600" />}
-                            <span className="text-sm">{copiedLink ? t("news.linkCopied") || "Link Copied!" : t("news.copyLink") || "Copy Link"}</span>
+                            {copiedLink ? <Check className="h-5 w-5 text-green-600 flex-shrink-0" /> : <Link2 className="h-5 w-5 text-gray-600 flex-shrink-0" />}
+                            <span className="text-sm leading-none">{copiedLink ? t("news.linkCopied") || "Link Copied!" : t("news.copyLink") || "Copy Link"}</span>
                           </button>
                         </div>
                       )}
@@ -601,36 +585,6 @@ export function NewsSection() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 </div>
-
-                {selectedGalleryImages.length > 1 && (
-                  <div className="px-6 md:px-8 lg:px-10 py-4 border-b border-gray-200 bg-white">
-                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                      {selectedGalleryImages.map((src, idx) => (
-                        <button
-                          key={`${src}-${idx}`}
-                          type="button"
-                          onClick={() => setSelectedModalImage(src)}
-                          className={`relative rounded-lg overflow-hidden border bg-gray-50 transition-colors ${
-                            selectedMainImage === src
-                              ? "border-red-500 ring-2 ring-red-200"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                          aria-label={`View image ${idx + 1}`}
-                        >
-                          <div className="relative h-14 sm:h-16">
-                            <Image
-                              src={src}
-                              alt={`Thumbnail ${idx + 1}`}
-                              fill
-                              className="object-cover"
-                              sizes="(min-width: 1024px) 120px, 20vw"
-                            />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 <div className="p-6 md:p-8 lg:p-10">
                   {/* Article meta */}
@@ -787,7 +741,7 @@ export function NewsSection() {
                     <div className="relative share-menu-container">
                       <Button
                         variant="outline"
-                        className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 gap-2 px-6 py-3 text-base font-semibold"
+                        className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 gap-2 px-6 py-3 text-base font-semibold items-center"
                         onClick={() => setShowShareMenu(showShareMenu === selectedArticle.id ? null : selectedArticle.id)}
                       >
                         <Share2 className="h-5 w-5" />
@@ -800,46 +754,46 @@ export function NewsSection() {
                           <div className="text-xs font-semibold text-gray-500 px-3 py-2 border-b">{t("news.shareOn") || "Share on"}</div>
                           <button
                             onClick={() => handleShare(selectedArticle, 'twitter')}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                           >
-                            <Twitter className="h-4 w-4 text-blue-400" />
-                            <span className="text-sm">Twitter</span>
+                            <Twitter className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                            <span className="text-sm leading-none">Twitter</span>
                           </button>
                           <button
                             onClick={() => handleShare(selectedArticle, 'facebook')}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                           >
-                            <Facebook className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm">Facebook</span>
+                            <Facebook className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                            <span className="text-sm leading-none">Facebook</span>
                           </button>
                           <button
                             onClick={() => handleShare(selectedArticle, 'linkedin')}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-blue-50 rounded-md transition-colors text-left"
                           >
-                            <Linkedin className="h-4 w-4 text-blue-700" />
-                            <span className="text-sm">LinkedIn</span>
+                            <Linkedin className="h-5 w-5 text-blue-700 flex-shrink-0" />
+                            <span className="text-sm leading-none">LinkedIn</span>
                           </button>
                           <button
                             onClick={() => handleShare(selectedArticle, 'whatsapp')}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-green-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-green-50 rounded-md transition-colors text-left"
                           >
-                            <MessageCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-sm">WhatsApp</span>
+                            <MessageCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                            <span className="text-sm leading-none">WhatsApp</span>
                           </button>
                           <button
                             onClick={() => handleShare(selectedArticle, 'email')}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-gray-50 rounded-md transition-colors text-left"
                           >
-                            <Mail className="h-4 w-4 text-gray-600" />
-                            <span className="text-sm">Email</span>
+                            <Mail className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                            <span className="text-sm leading-none">Email</span>
                           </button>
                           <div className="border-t my-1"></div>
                           <button
                             onClick={() => handleShare(selectedArticle, 'copy')}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-3 min-h-[44px] hover:bg-gray-50 rounded-md transition-colors text-left"
                           >
-                            {copiedLink ? <Check className="h-4 w-4 text-green-600" /> : <Link2 className="h-4 w-4 text-gray-600" />}
-                            <span className="text-sm">{copiedLink ? t("news.linkCopied") || "Link Copied!" : t("news.copyLink") || "Copy Link"}</span>
+                            {copiedLink ? <Check className="h-5 w-5 text-green-600 flex-shrink-0" /> : <Link2 className="h-5 w-5 text-gray-600 flex-shrink-0" />}
+                            <span className="text-sm leading-none">{copiedLink ? t("news.linkCopied") || "Link Copied!" : t("news.copyLink") || "Copy Link"}</span>
                           </button>
                         </div>
                       )}

@@ -2,24 +2,26 @@
 
 import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { GraduationCap, Stethoscope, Users, Heart, Globe, Award, ChevronLeft, ChevronRight, X } from "lucide-react"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { GraduationCap, Users, Heart, Award, ChevronLeft, ChevronRight, X } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { images, getImage } from "@/config/images"
 import { InlineImageUpload } from "@/components/inline-image-upload"
 
+type ProgramKey = Exclude<keyof typeof images.programs, "healthcare">
+
 export function ProgramsSection() {
   const { t, isRTL } = useLanguage()
   const [isAdmin, setIsAdmin] = useState(false)
-  const [activeKey, setActiveKey] = useState<keyof typeof images.programs | null>(null)
+  const [activeKey, setActiveKey] = useState<ProgramKey | null>(null)
   const [selectedModalImage, setSelectedModalImage] = useState<string | null>(null)
   const [programImages, setProgramImages] = useState<Record<ProgramKey, string>>({
     education: images.programs.education,
-    healthcare: images.programs.healthcare,
     economic: images.programs.economic,
     orphans: images.programs.orphans,
     rights: images.programs.rights,
     emergency: images.programs.emergency,
+    refugeeSupport: images.programs.refugeeSupport,
   })
 
   useEffect(() => {
@@ -27,11 +29,11 @@ export function ProgramsSection() {
       setIsAdmin(new URLSearchParams(window.location.search).get("admin") === "1")
       setProgramImages((prev) => ({
         education: localStorage.getItem("programs_education_image_url") || prev.education,
-        healthcare: localStorage.getItem("programs_healthcare_image_url") || prev.healthcare,
         economic: localStorage.getItem("programs_economic_image_url") || prev.economic,
         orphans: localStorage.getItem("programs_orphans_image_url") || prev.orphans,
         rights: localStorage.getItem("programs_rights_image_url") || prev.rights,
         emergency: localStorage.getItem("programs_emergency_image_url") || prev.emergency,
+        refugeeSupport: localStorage.getItem("programs_refugeeSupport_image_url") || prev.refugeeSupport,
       }))
     }
   }, [])
@@ -50,20 +52,6 @@ export function ProgramsSection() {
           t("programs.onGroundSchools"),
           t("programs.stemEducation"),
           t("programs.certifiedPrograms"),
-        ],
-      },
-      {
-        title: t("programs.healthcare"),
-        description: t("programs.healthcareDesc"),
-        icon: Stethoscope,
-        color: "green",
-        key: "healthcare" as const,
-        image: programImages.healthcare,
-        features: [
-          t("programs.mobileHealthClinics"),
-          t("programs.mentalHealthCounseling"),
-          t("programs.healthcareCapacity"),
-          t("programs.emergencyMedical"),
         ],
       },
       {
@@ -95,20 +83,6 @@ export function ProgramsSection() {
         ],
       },
       {
-        title: t("programs.rights"),
-        description: t("programs.rightsDesc"),
-        icon: Globe,
-        color: "orange",
-        key: "rights" as const,
-        image: programImages.rights,
-        features: [
-          t("programs.rightsWorkshops"),
-          t("programs.documentationEfforts"),
-          t("programs.communityAdvocacy"),
-          t("programs.policyResearch"),
-        ],
-      },
-      {
         title: t("programs.emergency"),
         description: t("programs.emergencyDesc"),
         icon: Award,
@@ -122,6 +96,15 @@ export function ProgramsSection() {
           t("programs.recoveryPlanning"),
         ],
       },
+      {
+        title: t("programs.refugeeSupport"),
+        description: t("programs.refugeeSupportDesc"),
+        icon: Users,
+        color: "green",
+        key: "refugeeSupport" as const,
+        image: programImages.refugeeSupport,
+        features: [t("programs.businessTraining"), t("programs.technicalSkills")],
+      },
     ],
     [programImages, t]
   )
@@ -132,8 +115,6 @@ export function ProgramsSection() {
     | { type: "p"; text: string }
     | { type: "h3"; text: string }
     | { type: "ul"; items: string[] }
-
-  type ProgramKey = keyof typeof images.programs
   type ProgramLongContent = Partial<Record<ProgramKey, readonly ProgramContentBlock[]>>
 
   const programLongContent: ProgramLongContent = useMemo(() => {
@@ -260,15 +241,19 @@ export function ProgramsSection() {
           text: "After conducting a careful needs assessment, BBE ensured that each child received essential items they had requested, including shoes, school supplies, and personal necessities, supporting both their education and everyday well-being. Events like these reflect BBE’s ongoing commitment to nurturing and empowering orphaned children, giving them not only moments of happiness but also tools and support to build brighter futures. Through our initiatives, we strive to create lasting impact, hope, and opportunity in the lives of the most vulnerable children in our community.",
         },
       ],
-      healthcare: [
-        { type: "h3", text: "Healthcare Support" },
+      refugeeSupport: [
+        { type: "h3", text: "Refugee Support Program" },
         {
           type: "p",
-          text: "BBE’s healthcare initiatives aim to provide comprehensive mental and physical health support for underserved communities. Our focus is on reaching vulnerable populations, including those in remote areas, women, children, and children.",
+          text: "As refugee supportive organization, we believe in standing in solidarity with those seeking sanctuary in the UK, acting as a source of hope and unity. For this purpose we are pleased to had the opportunity to host refugee gathering and empowerment session in London in February 2024.",
         },
         {
           type: "p",
-          text: "BBE actively supports families who are unable to afford their medical expenses and essential medications, particularly in emergency situations. Our healthcare initiatives prioritize women, children, and other vulnerable members of the community, ensuring that urgent medical needs are met when resources are scarce. By providing access to treatment, medications, and guidance, BBE helps alleviate the burden on families facing health crises, promoting both physical and mental well-being and reinforcing a safety net for those most at risk.",
+          text: "This event brought together over 100 participants from diverse backgrounds to foster a sense of community. During the session, we delivered specialized e-commerce training designed to give refugees the practical tools to start their own businesses or find employment, moving them closer to financial independence.",
+        },
+        {
+          type: "p",
+          text: "The event brought together people from all walks of life, including business leaders, solicitors, accountants, scholars, and students, to share their expertise and support. By connecting refugees with these professionals during our Q&A and networking segments, we helped bridge the gap between new arrivals and the wider UK community, creating a lasting support network for everyone involved.",
         },
       ],
     } as const satisfies ProgramLongContent
@@ -422,42 +407,13 @@ export function ProgramsSection() {
                   {program.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {program.features.map((feature, idx) => (
-                    <li
-                      key={idx}
-                      className={`flex items-center text-sm text-gray-600 ${isRTL ? "flex-row-reverse" : ""}`}
-                    >
-                      <div
-                        className={`w-2 h-2 rounded-full ${isRTL ? "ml-3" : "mr-3"} flex-shrink-0 ${
-                          program.color === "blue"
-                            ? "bg-blue-500"
-                            : program.color === "green"
-                              ? "bg-green-500"
-                              : program.color === "purple"
-                                ? "bg-purple-500"
-                                : program.color === "red"
-                                  ? "bg-red-500"
-                                  : program.color === "orange"
-                                    ? "bg-orange-500"
-                                    : program.color === "yellow"
-                                      ? "bg-yellow-500"
-                                      : "bg-gray-500"
-                        }`}
-                      ></div>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
             </Card>
           ))}
         </div>
       </div>
 
       {activeProgram && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal}></div>
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto z-10">
             <div className="sticky top-0 bg-white border-b border-gray-200 p-4 md:p-6 flex justify-between items-start gap-4 z-10">
@@ -469,18 +425,13 @@ export function ProgramsSection() {
                 onClick={closeModal}
                 className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 flex-shrink-0"
                 aria-label="Close"
+                type="button"
               >
                 <X className="h-5 w-5 md:h-6 md:w-6" />
               </button>
             </div>
 
             <div className="p-4 md:p-6">
-              <div className="text-sm md:text-base leading-relaxed mb-6">
-                {renderLongContent(activeProgram.key) || (
-                  <p className="text-gray-700">{activeProgram.description}</p>
-                )}
-              </div>
-
               <div className="relative rounded-lg overflow-hidden shadow-lg bg-white mb-4">
                 <div className="relative h-64 md:h-[420px] bg-gradient-to-br from-gray-50 via-white to-slate-100 flex items-center justify-center">
                   <Image
@@ -539,53 +490,36 @@ export function ProgramsSection() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-red-600 font-semibold mb-3">{t("programs.title")}</p>
-                  <ul className="space-y-2">
-                    {activeProgram.features.map((feature, idx) => (
-                      <li
-                        key={idx}
-                        className={`flex items-center text-sm text-gray-700 ${isRTL ? "flex-row-reverse" : ""}`}
+              {modalImages.length > 1 && (
+                <div className="mt-6">
+                  <p className="text-xs uppercase tracking-[0.2em] text-red-600 font-semibold mb-3">Gallery</p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                    {modalImages.map((src, idx) => (
+                      <button
+                        key={`${src}-${idx}`}
+                        type="button"
+                        onClick={() => setSelectedModalImage(src)}
+                        className={`relative rounded-lg overflow-hidden border bg-gray-50 transition-colors ${
+                          (selectedModalImage || activeImage) === src
+                            ? "border-red-500 ring-2 ring-red-200"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                        aria-label={`View ${activeProgram.title} image ${idx + 1}`}
                       >
-                        <span className={`w-2 h-2 rounded-full bg-red-500 ${isRTL ? "ml-3" : "mr-3"}`} />
-                        {feature}
-                      </li>
+                        <div className="relative h-20 sm:h-24">
+                          <Image
+                            src={getImage(src, images.fallback.placeholder)}
+                            alt={`${activeProgram.title} thumbnail ${idx + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 33vw"
+                          />
+                        </div>
+                      </button>
                     ))}
-                  </ul>
-                </div>
-
-                {modalImages.length > 1 && (
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-red-600 font-semibold mb-3">Gallery</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                      {modalImages.map((src, idx) => (
-                        <button
-                          key={`${src}-${idx}`}
-                          type="button"
-                          onClick={() => setSelectedModalImage(src)}
-                          className={`relative rounded-lg overflow-hidden border bg-gray-50 transition-colors ${
-                            (selectedModalImage || activeImage) === src
-                              ? "border-red-500 ring-2 ring-red-200"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                          aria-label={`View ${activeProgram.title} image ${idx + 1}`}
-                        >
-                          <div className="relative h-20 sm:h-24">
-                            <Image
-                              src={getImage(src, images.fallback.placeholder)}
-                              alt={`${activeProgram.title} thumbnail ${idx + 1}`}
-                              fill
-                              className="object-cover"
-                              sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 33vw"
-                            />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

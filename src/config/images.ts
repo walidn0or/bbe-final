@@ -32,8 +32,8 @@ export const images = {
   // - Main image: put file in public/images/content/ and set path below
   // - Background video: put your file (e.g. background-video.mp4) in public/images/videos/ and set path below
   hero: {
-    main: "/images/content/Education + Human Rights Advocacy_.jpg",
-    background: "/images/videos/background-video.mp4"
+    main: "/hero/background-video.mp4",
+    background: "/hero/background-video.mp4"
   },
 
   // Home page gallery – the 6 tiles. Videos use their first frame as thumbnail (no separate thumbnail needed). Click a video to play.
@@ -66,7 +66,7 @@ export const images = {
 
   // About Section
   about: {
-    main: "/images/content/Education + Human Rights Advocacy_.jpg",
+    main: "/hero/background-video.mp4",
     team: {
       // Board of Trustees
       sosan: "/images/members/Sosan Hashimi.jpeg",
@@ -114,7 +114,8 @@ export const images = {
     economic: "/images/content/Economic Empowerment1.jpeg",
     orphans: "/images/content/Orphaned/Orphaned Children Support.jpg",
     rights: "/images/content/Human Rights Advocacy_.jpg",
-    emergency: "/images/content/healthcare/Healthcare Support(Emergency Medical Support)(1).jpeg"
+    emergency: "/images/content/healthcare/Healthcare Support(Emergency Medical Support)(1).jpeg",
+    refugeeSupport: "/images/news/News.jpeg"
   },
 
   programsGalleries: {
@@ -138,7 +139,8 @@ export const images = {
     emergency: [
       "/images/content/healthcare/Healthcare Support(Emergency Medical Support)(1).jpeg",
       "/images/content/healthcare/Healthcare Support(Emergency Medical Support).JPEG"
-    ]
+    ],
+    refugeeSupport: []
   },
 
   // News Section
@@ -312,10 +314,7 @@ export const images = {
   ourWorkGallery: {
     // No extra gallery images yet for menstrual hygiene
     menstrualHygiene: [],
-    languageSkills: [
-      // Keep only the main extra image
-      "/images/home/our-work/ielts.jpeg"
-    ],
+    languageSkills: [],
     orphanSupport: [
       // Keep only the main extra image
     "/images/home/our-work/Iftar.jpeg"

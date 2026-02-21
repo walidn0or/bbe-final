@@ -35,7 +35,7 @@ export default function NotFound() {
           <Link href="/" className="w-full sm:w-auto">
             <Button
               size="lg"
-              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+              className="w-full sm:w-auto h-auto bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Home className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Go to Homepage
@@ -46,7 +46,7 @@ export default function NotFound() {
             variant="outline"
             size="lg"
             onClick={() => window.history.back()}
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg border-2 border-gray-300 hover:border-red-600 hover:text-red-600 transition-all duration-200"
+            className="w-full sm:w-auto h-auto px-6 sm:px-8 py-3 rounded-lg border-2 border-gray-300 hover:border-red-600 hover:text-red-600 transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Go Back

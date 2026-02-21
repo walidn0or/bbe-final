@@ -69,9 +69,9 @@ export function ContactSection({ scrollToSection }: ContactSectionProps) {
   return (
     <section id="contact" className="py-12 md:py-16 lg:py-20 bg-gray-900 text-white scroll-mt-20">
       <div className="container mx-auto px-4">
-        <div className={`text-center mb-12 md:mb-16 ${isRTL ? "text-right" : ""}`}>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("contact.title")}</h2>
-          <p className="text-lg md:text-xl opacity-90">{t("contact.subtitle")}</p>
+        <div className={`text-center mb-8 sm:mb-12 md:mb-16 px-2 sm:px-0 ${isRTL ? "text-right" : ""}`}>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">{t("contact.title")}</h2>
+          <p className="text-base sm:text-lg md:text-xl opacity-90">{t("contact.subtitle")}</p>
         </div>
         <div
           className={`grid lg:grid-cols-3 gap-8 md:gap-12 max-w-7xl mx-auto ${isRTL ? "lg:grid-flow-col-dense" : ""}`}
@@ -221,10 +221,10 @@ export function ContactSection({ scrollToSection }: ContactSectionProps) {
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transition-all duration-300 hover:scale-105 text-sm md:text-base py-2 md:py-3"
+                    className="w-full h-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transition-all duration-300 hover:scale-105 text-sm md:text-base py-2.5 sm:py-3 flex items-center justify-center gap-2 font-medium"
                   >
-                    <Mail className={`h-4 w-4 md:h-5 md:w-5 ${isRTL ? "ml-2" : "mr-2"}`} />
-                    {submitting ? "Sending..." : t("contact.sendBtn")}
+                    <Mail className={`h-4 w-4 md:h-5 md:w-5 flex-shrink-0 ${isRTL ? "order-2" : ""}`} />
+                    <span className="whitespace-nowrap">{submitting ? "Sending..." : t("contact.sendBtn")}</span>
                   </Button>
                   {error && (
                     <div className="bg-red-100 border border-red-300 text-red-700 rounded-lg p-3" role="alert" aria-live="polite">

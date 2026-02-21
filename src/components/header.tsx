@@ -16,9 +16,42 @@ interface HeaderProps {
 
 export function Header({ activeSection }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false)
+  const [desktopAboutDropdownOpen, setDesktopAboutDropdownOpen] = useState(false)
+  const [mobileAboutDropdownOpen, setMobileAboutDropdownOpen] = useState(false)
+  const [desktopPublicationsDropdownOpen, setDesktopPublicationsDropdownOpen] = useState(false)
+  const [mobilePublicationsDropdownOpen, setMobilePublicationsDropdownOpen] = useState(false)
   const { t, isRTL } = useLanguage()
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const desktopDropdownRef = useRef<HTMLDivElement | null>(null)
+  const desktopPublicationsDropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const clearCloseTimeout = () => {
+    if (!closeTimeoutRef.current) return
+    clearTimeout(closeTimeoutRef.current)
+    closeTimeoutRef.current = null
+  }
+
+  const openDesktopDropdown = (type: "about" | "publications") => {
+    clearCloseTimeout()
+    if (type === "about") {
+      setDesktopPublicationsDropdownOpen(false)
+      setDesktopAboutDropdownOpen(true)
+      return
+    }
+    setDesktopAboutDropdownOpen(false)
+    setDesktopPublicationsDropdownOpen(true)
+  }
+
+  const scheduleCloseDesktopDropdown = (type: "about" | "publications") => {
+    clearCloseTimeout()
+    closeTimeoutRef.current = setTimeout(() => {
+      if (type === "about") {
+        setDesktopAboutDropdownOpen(false)
+      } else {
+        setDesktopPublicationsDropdownOpen(false)
+      }
+    }, 150)
+  }
 
   // Clear timeout on unmount
   useEffect(() => {
@@ -29,20 +62,31 @@ export function Header({ activeSection }: HeaderProps) {
     }
   }, [])
 
-  const handleDropdownEnter = () => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current)
-      closeTimeoutRef.current = null
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent | PointerEvent) => {
+      const targetNode = event.target as Node
+      const clickedAbout = desktopDropdownRef.current?.contains(targetNode)
+      const clickedPublications = desktopPublicationsDropdownRef.current?.contains(targetNode)
+      if (clickedAbout || clickedPublications) return
+      setDesktopAboutDropdownOpen(false)
+      setDesktopPublicationsDropdownOpen(false)
     }
-    setAboutDropdownOpen(true)
-  }
 
-  const handleDropdownLeave = () => {
-    // Add a delay before closing to allow clicking on submenu items
-    closeTimeoutRef.current = setTimeout(() => {
-      setAboutDropdownOpen(false)
-    }, 150)
-  }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setDesktopAboutDropdownOpen(false)
+        setDesktopPublicationsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [])
 
   const navigationItems = [
     { name: t("header.home"), id: "home", href: "/" },
@@ -60,23 +104,35 @@ export function Header({ activeSection }: HeaderProps) {
     { name: t("header.programs"), id: "programs", href: "/programs" },
     { name: t("header.news"), id: "news", href: "/news" },
     { name: t("header.impact"), id: "impact", href: "/impact" },
-    { name: "Publications", id: "publications", href: "/publications" },
+    {
+      name: "Publications",
+      id: "publications",
+      href: "/publications",
+      hasDropdown: true,
+      subItems: [
+        { name: "Annual Impact and Financial Report", href: "/publications#annual-reports" },
+        { name: "Books and Students Library", href: "/publications#library" },
+        { name: "Student Narratives", href: "/publications#student-narratives" },
+      ],
+    },
     { name: "Enroll", id: "enroll", href: "/enroll" },
     { name: t("header.contact"), id: "contact", href: "/contact" },
   ]
 
   const handleMobileMenuClose = () => {
     setMobileMenuOpen(false)
+    setMobileAboutDropdownOpen(false)
+    setMobilePublicationsDropdownOpen(false)
   }
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b sticky top-0 z-50 transition-all duration-300">
-      <div className="container mx-auto px-3 md:px-4 py-2 md:py-3">
-        <div className={`flex items-center justify-between gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+    <header className="relative bg-white/95 backdrop-blur-sm shadow-sm border-b sticky top-0 z-[100] transition-all duration-300 w-full overflow-y-visible">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 max-w-full">
+        <div className={`flex items-center justify-between gap-2 min-w-0 ${isRTL ? "flex-row-reverse" : ""}`}>
           {/* Logo Section */}
           <Link
             href="/"
-            className={`flex items-center space-x-2 md:space-x-3 cursor-pointer flex-shrink min-w-0 ${isRTL ? "flex-row-reverse space-x-reverse" : ""}`}
+            className={`flex items-center space-x-2 md:space-x-3 cursor-pointer flex-shrink-0 min-w-0 ${isRTL ? "flex-row-reverse space-x-reverse" : ""}`}
           >
             <Image
               src={images.logo}
@@ -84,58 +140,118 @@ export function Header({ activeSection }: HeaderProps) {
               width={48}
               height={48}
               className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 flex-shrink-0"
+              priority
             />
-            <div className={`flex flex-col min-w-0 ${isRTL ? "text-right" : ""}`}>
-              <h1 className="text-sm md:text-lg lg:text-xl font-bold text-brand-blue leading-tight whitespace-normal break-words">
+            <div className={`hidden sm:flex flex-col min-w-0 max-w-[200px] md:max-w-none ${isRTL ? "text-right" : ""}`}>
+              <h1 className="text-sm md:text-lg lg:text-xl font-bold text-brand-blue leading-tight truncate">
                 Beyond Borders Empowerment
               </h1>
-              <p className="text-[10px] md:text-xs lg:text-sm text-gray-600 hidden sm:block whitespace-normal break-words">
+              <p className="text-[10px] md:text-xs lg:text-sm text-gray-600 truncate">
                 {t("")}
               </p>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 flex-shrink-0 min-w-0">
             {navigationItems.map((item) => (
               item.hasDropdown ? (
                 <div
                   key={item.id}
-                  className="relative"
-                  onMouseEnter={handleDropdownEnter}
-                  onMouseLeave={handleDropdownLeave}
+                  ref={item.id === "about" ? desktopDropdownRef : item.id === "publications" ? desktopPublicationsDropdownRef : undefined}
+                  className="relative z-[100] overflow-visible"
+                  onMouseEnter={
+                    item.id === "about"
+                      ? () => openDesktopDropdown("about")
+                      : item.id === "publications"
+                        ? () => openDesktopDropdown("publications")
+                        : undefined
+                  }
+                  onMouseLeave={
+                    item.id === "about"
+                      ? () => scheduleCloseDesktopDropdown("about")
+                      : item.id === "publications"
+                        ? () => scheduleCloseDesktopDropdown("publications")
+                        : undefined
+                  }
                 >
                   <div
-                    className={`px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-medium transition-all duration-200 hover:bg-gray-100 flex items-center gap-1 ${
+                    className={`px-2 xl:px-3 py-2 rounded-lg text-xs xl:text-sm font-medium transition-all duration-200 hover:bg-gray-100 flex items-center gap-1 whitespace-nowrap ${
                       activeSection === item.id
                         ? "text-red-600 bg-red-50 border-b-2 border-red-600"
                         : "text-gray-700 hover:text-red-600"
                     }`}
                   >
-                    <Link href={item.href} className="leading-none">
+                    <Link href={item.href} className="leading-none truncate">
                       {item.name}
                     </Link>
                     <button
                       type="button"
-                      onClick={() => setAboutDropdownOpen((v) => !v)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        clearCloseTimeout()
+                        if (item.id === "about") {
+                          setDesktopPublicationsDropdownOpen(false)
+                          setDesktopAboutDropdownOpen((v) => !v)
+                          return
+                        }
+                        if (item.id === "publications") {
+                          setDesktopAboutDropdownOpen(false)
+                          setDesktopPublicationsDropdownOpen((v) => !v)
+                        }
+                      }}
                       className="p-1 rounded hover:bg-gray-200/60 transition-colors"
                       aria-label="Toggle About menu"
+                      aria-expanded={item.id === "about" ? desktopAboutDropdownOpen : desktopPublicationsDropdownOpen}
                     >
                       <ChevronDown
-                        className={`h-4 w-4 transition-transform duration-200 ${aboutDropdownOpen ? "rotate-180" : ""}`}
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          item.id === "about"
+                            ? desktopAboutDropdownOpen
+                              ? "rotate-180"
+                              : ""
+                            : desktopPublicationsDropdownOpen
+                              ? "rotate-180"
+                              : ""
+                        }`}
                       />
                     </button>
                   </div>
-                  {aboutDropdownOpen && (
+                  {item.id === "about" && desktopAboutDropdownOpen && (
                     <div
-                      className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
-                      onMouseEnter={handleDropdownEnter}
-                      onMouseLeave={handleDropdownLeave}
+                      className={`absolute top-full mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] ${
+                        isRTL ? "right-0" : "left-0"
+                      }`}
+                      onMouseEnter={() => openDesktopDropdown("about")}
+                      onMouseLeave={() => scheduleCloseDesktopDropdown("about")}
                     >
                       {item.subItems?.map((subItem, idx) => (
                         <Link
                           key={idx}
                           href={subItem.href}
+                          onClick={() => setDesktopAboutDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-150"
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {item.id === "publications" && desktopPublicationsDropdownOpen && (
+                    <div
+                      className={`absolute top-full mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] ${
+                        isRTL ? "right-0" : "left-0"
+                      }`}
+                      onMouseEnter={() => openDesktopDropdown("publications")}
+                      onMouseLeave={() => scheduleCloseDesktopDropdown("publications")}
+                    >
+                      {item.subItems?.map((subItem, idx) => (
+                        <Link
+                          key={idx}
+                          href={subItem.href}
+                          onClick={() => setDesktopPublicationsDropdownOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-150"
                         >
                           {subItem.name}
@@ -148,7 +264,7 @@ export function Header({ activeSection }: HeaderProps) {
                 <Link
                   key={item.id}
                   href={item.href}
-                  className={`px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-medium transition-all duration-200 hover:bg-gray-100 ${
+                  className={`px-2 xl:px-3 py-2 rounded-lg text-xs xl:text-sm font-medium transition-all duration-200 hover:bg-gray-100 whitespace-nowrap ${
                     activeSection === item.id
                       ? "text-red-600 bg-red-50 border-b-2 border-red-600"
                       : "text-gray-700 hover:text-red-600"
@@ -161,37 +277,37 @@ export function Header({ activeSection }: HeaderProps) {
           </nav>
 
           {/* Right Section - Language Switcher and Donate Button */}
-          <div className={`flex items-center space-x-2 md:space-x-4 ${isRTL ? "flex-row-reverse space-x-reverse" : ""}`}>
+          <div className={`flex items-center space-x-2 md:space-x-4 flex-shrink-0 ${isRTL ? "flex-row-reverse space-x-reverse" : ""}`}>
             <LanguageSwitcher />
             
             <Link href="/donate">
               <Button
                 variant="destructive"
                 size="sm"
-                className="bg-red-600 hover:bg-red-700 text-white font-medium px-3 md:px-6 py-2 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
-                leftIcon={<Heart className="h-4 w-4" />}
+                className="h-auto bg-red-600 hover:bg-red-700 text-white font-medium px-2 sm:px-3 md:px-6 py-1.5 sm:py-2 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-1.5 sm:gap-2"
               >
-                <span className="hidden sm:inline">{t("header.donate")}</span>
-                <span className="sm:hidden">{t("header.donateShort")}</span>
+                <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">{t("header.donate")}</span>
+                <span className="sm:hidden whitespace-nowrap">{t("header.donateShort") || "Donate"}</span>
               </Button>
             </Link>
 
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
-              size="sm"
-              className="lg:hidden p-2"
+              size="icon"
+              className="lg:hidden h-11 w-11 min-h-[44px] min-w-[44px]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-gray-200">
-            <nav className="flex flex-col space-y-2 pt-4">
+          <div className="lg:hidden absolute left-0 right-0 top-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg">
+            <nav className="flex flex-col space-y-2 p-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
               {navigationItems.map((item) => (
                 item.hasDropdown ? (
                   <div key={item.id}>
@@ -207,16 +323,48 @@ export function Header({ activeSection }: HeaderProps) {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
+                        onClick={() => {
+                          if (item.id === "about") {
+                            setMobileAboutDropdownOpen((v) => !v)
+                            return
+                          }
+                          if (item.id === "publications") {
+                            setMobilePublicationsDropdownOpen((v) => !v)
+                          }
+                        }}
                         className="p-1 rounded hover:bg-gray-200/60 transition-colors"
                         aria-label="Toggle About menu"
+                        aria-expanded={item.id === "about" ? mobileAboutDropdownOpen : mobilePublicationsDropdownOpen}
                       >
                         <ChevronDown
-                          className={`h-4 w-4 transition-transform duration-200 ${aboutDropdownOpen ? "rotate-180" : ""}`}
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            item.id === "about"
+                              ? mobileAboutDropdownOpen
+                                ? "rotate-180"
+                                : ""
+                              : mobilePublicationsDropdownOpen
+                                ? "rotate-180"
+                                : ""
+                          }`}
                         />
                       </button>
                     </div>
-                    {aboutDropdownOpen && (
+                    {item.id === "about" && mobileAboutDropdownOpen && (
+                      <div className={`ml-4 mt-2 space-y-1 ${isRTL ? "mr-4 ml-0" : ""}`}>
+                        {item.subItems?.map((subItem, idx) => (
+                          <Link
+                            key={idx}
+                            href={subItem.href}
+                            onClick={handleMobileMenuClose}
+                            className="block px-4 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    {item.id === "publications" && mobilePublicationsDropdownOpen && (
                       <div className={`ml-4 mt-2 space-y-1 ${isRTL ? "mr-4 ml-0" : ""}`}>
                         {item.subItems?.map((subItem, idx) => (
                           <Link

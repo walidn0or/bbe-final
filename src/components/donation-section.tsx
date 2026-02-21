@@ -153,7 +153,7 @@ export function DonationSection() {
                 <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{item.amount}</div>
                 <div className="text-gray-600 text-sm md:text-base mb-4">{item.impact}</div>
                 <Button
-                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm md:text-base py-2 md:py-3 transition-all duration-300 hover:scale-105"
+                  className="w-full h-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm md:text-base py-2 md:py-3 transition-all duration-300 hover:scale-105"
                   onClick={() => { setAmount(item.amount.replace('£', '')); setCustomAmount(''); }}
                 >
                   {t("donate.selectAmount")}
@@ -501,7 +501,7 @@ export function DonationSection() {
                   size="lg"
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm md:text-lg py-3 md:py-4 transition-all duration-300 hover:scale-105 disabled:opacity-60"
+                  className="w-full h-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm md:text-lg py-3 md:py-4 transition-all duration-300 hover:scale-105 disabled:opacity-60"
                 >
                   <Heart className={`h-4 w-4 md:h-5 md:w-5 ${isRTL ? "ml-2" : "mr-2"}`} />
                   {submitting ? t("donate.completeDonation") + '...' : t("donate.completeDonation")}

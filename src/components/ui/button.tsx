@@ -2,7 +2,7 @@ import React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none",
+  "inline-flex items-center justify-center rounded-lg font-medium leading-tight transition-all duration-300 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none",
   {
     variants: {
       variant: {
@@ -20,10 +20,10 @@ const buttonVariants = cva(
         link: "text-blue-600 underline-offset-4 hover:underline dark:text-blue-400",
       },
       size: {
-        default: "h-10 px-6 py-2 text-sm",
-        sm: "h-8 px-4 text-xs",
-        lg: "h-12 px-8 text-base",
-        xl: "h-14 px-10 text-lg",
+        default: "min-h-10 px-6 py-2 text-sm",
+        sm: "min-h-8 px-4 py-1.5 text-xs",
+        lg: "min-h-12 px-8 py-3 text-base",
+        xl: "min-h-14 px-10 py-3.5 text-lg",
         icon: "h-10 w-10 p-0",
       },
       shadow: {
@@ -106,9 +106,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </>
         ) : (
           <>
-            {leftIcon && <span className="mr-2">{leftIcon}</span>}
+            {leftIcon && <span className="mr-2 inline-flex items-center flex-shrink-0">{leftIcon}</span>}
             {children}
-            {rightIcon && <span className="ml-2">{rightIcon}</span>}
+            {rightIcon && <span className="ml-2 inline-flex items-center flex-shrink-0">{rightIcon}</span>}
           </>
         )}
       </button>

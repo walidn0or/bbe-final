@@ -9,7 +9,7 @@ export function ImpactSection() {
 
   const stats = [
     { number: "400+", label: "students benefiting from our English Language Program", icon: Users },
-    { number: "500+", label: "community of refugees support in London", icon: Users },
+    { number: "100+", label: "community of refugees support in London", icon: Users },
     { number: "150", label: "Online schooling (7-12) for Afghan girls", icon: GraduationCap },
     { number: "110", label: "orphaned children supported", icon: Heart },
     { number: "300+", label: "students in coding & Microsoft Office courses", icon: GraduationCap },

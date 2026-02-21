@@ -80,18 +80,19 @@ export function Footer({ scrollToSection }: FooterProps) {
                   className="w-16 h-16"
                 />
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">
-                    Beyond Borders Empowerment
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 leading-tight">
+                    <span className="hidden sm:inline">Beyond Borders Empowerment</span>
+                    <span className="sm:hidden">BBE</span>
                   </h3>
-                  <p className="text-gray-300 text-sm">
-                    Registered UK Charity - Companies House: 15570506 | Charity Registration: 15570506
+                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                    <span className="hidden sm:inline">Non-profit organization registered with Companies House registration number 15570506</span>
+              
                   </p>
                 </div>
               </div>
               
-              <p className="text-gray-300 leading-relaxed mb-6 max-w-md">
-                Empowering marginalized communities through education, economic opportunities, 
-                healthcare support, and humanitarian aid — with a special focus on women and girls.
+              <p className="text-gray-300 leading-relaxed mb-6 max-w-md text-sm sm:text-base">
+                Empowering marginalised communities such as refugees and people seeking asylum in the UK and supporting Afghan women and girls through education, economic empowerment opportunities.
               </p>
 
               {/* Addresses */}
@@ -106,14 +107,8 @@ export function Footer({ scrollToSection }: FooterProps) {
                     <div>London, E1 5QJ</div>
                   </div>
                 </div>
-                <div className={`flex items-start gap-3 text-gray-300 ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <MapPin className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <div className="font-semibold text-white mb-1">Country Address:</div>
-                    <div>House No. 4, 10th District,</div>
-                    <div>Shahe-e-Naw, Kabul, Afghanistan</div>
-                  </div>
-                </div>
+        
+                  
                 <div className={`flex items-center gap-3 text-gray-300 ${isRTL ? "flex-row-reverse" : ""}`}>
                   <Mail className="h-5 w-5 text-green-400 flex-shrink-0" />
                   <a href="mailto:info@bbe.ngo" className="text-sm hover:text-white transition-colors">
@@ -132,9 +127,9 @@ export function Footer({ scrollToSection }: FooterProps) {
                     rel="noopener noreferrer"
                     className="block"
                   >
-                    <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all duration-300 hover:scale-105">
-                      <Heart className="h-4 w-4 mr-2" />
-                      {t("footer.goFundMe")}
+                    <Button className="w-full h-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 font-medium py-2.5">
+                      <Heart className="h-4 w-4 flex-shrink-0" />
+                      <span className="whitespace-nowrap">{t("footer.goFundMe")}</span>
                     </Button>
                   </a>
                 </div>
